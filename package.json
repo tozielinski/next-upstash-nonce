@@ -2,9 +2,10 @@
   "name": "@tozielinski/next-upstash-nonce",
   "version": "0.1.0",
   "description": "Create, store, verify and delete nonces in Redis by Upstash for Next.js",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -22,5 +23,13 @@
   "bugs": {
     "url": "https://github.com/tozielinski/next-upstash-nonce/issues"
   },
-  "homepage": "https://github.com/tozielinski/next-upstash-nonce#readme"
+  "homepage": "https://github.com/tozielinski/next-upstash-nonce#readme",
+  "dependencies": {
+    "@upstash/redis": "^1.35.6",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
 }
