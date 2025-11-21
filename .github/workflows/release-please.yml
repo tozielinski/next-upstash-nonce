@@ -19,7 +19,7 @@ jobs:
       - name: Run Release Please
         uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           release-type: node
           path: "."                 # das root package
           config-file: .release-please-config.json
