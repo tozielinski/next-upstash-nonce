@@ -1,12 +1,8 @@
 'use server';
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NonceManager = void 0;
-// import {v4 as uuid} from "uuid";
-const crypto_1 = __importDefault(require("crypto"));
+const uuid_1 = require("uuid");
 class NonceManager {
     redis;
     length;
@@ -24,9 +20,9 @@ class NonceManager {
      * and returns the nonce string.
      */
     async create() {
-        const buffer = crypto_1.default.randomBytes(this.length);
-        const nonce = buffer.toString("hex");
-        // const nonce = uuid();
+        // const buffer = crypto.randomBytes(this.length);
+        // const nonce = buffer.toString("hex");
+        const nonce = (0, uuid_1.v4)();
         const key = this.prefix + nonce;
         // console.log("creating nonce:", nonce);
         // set with ttl (nx not required — collisions extremely unlikely)
