@@ -25,15 +25,16 @@ export class NonceManager {
 
 
     /**
-     * Generiert einen neuen, kryptographisch sicheren Nonce,
-     * speichert ihn in Redis und gibt ihn zurück.
+     * generates a new, secure nonce,
+     * inserts it into Redis with a TTL,
+     * and returns the nonce string.
      */
     async create(): Promise<string> {
         const buffer = crypto.randomBytes(this.length);
         const nonce = buffer.toString("hex");
         const key = this.prefix + nonce;
 
-console.log("creating nonce:", nonce);
+// console.log("creating nonce:", nonce);
 // set with ttl (nx not required — collisions extremely unlikely)
         await this.redis.set(key, "1", { ex: this.ttlSeconds });
         return nonce;
@@ -41,8 +42,8 @@ console.log("creating nonce:", nonce);
 
 
     /**
-     * Verifiziert einen Nonce: prüft ob vorhanden, und löscht ihn atomisch.
-     * Gibt true zurück, wenn Validierung erfolgreich war (Nonce existierte und wurde entfernt).
+     * verifies a nonce and deletes it from Redis,
+     * returning true if the nonce exists and has not expired.
      */
     async verifyAndDelete(nonce: string): Promise<boolean> {
         if (!nonce) return false;
@@ -70,7 +71,7 @@ console.log("creating nonce:", nonce);
 
 
     /**
-     * Optional: entferne einen Nonce ohne Verifizierung
+     * Optional: delete a nonce from Redis manually
      */
     async delete(nonce: string): Promise<void> {
         const key = this.prefix + nonce;
