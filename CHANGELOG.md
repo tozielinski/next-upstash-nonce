@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/tozielinski/next-upstash-nonce/compare/v1.2.2...v1.2.3) (2025-11-21)
+
+
+### Bug Fixes
+
+* dist folder was missing on build ([8afc1d5](https://github.com/tozielinski/next-upstash-nonce/commit/8afc1d5a0add63b1779a08cc4b1e4249ba3cfed9))
+
 ## [1.2.2](https://github.com/tozielinski/next-upstash-nonce/compare/v1.2.1...v1.2.2) (2025-11-21)
 
 
