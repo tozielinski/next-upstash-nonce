@@ -12,20 +12,20 @@ jobs:
   publish:
     name: Publish package to npm
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: https://registry.npmjs.org/
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org/"
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Build
+        run: npm run build
 
-      - name: Publish to npm
+      - name: Publish to npm via Trusted Publishing
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
