@@ -1,0 +1,8 @@
+{
+  "release-type": "node",
+  "packages": {
+    ".": {}
+  },
+  "bump-minor-pre-major": true,
+  "pull-request-header": ":rocket: release-please"
+}
