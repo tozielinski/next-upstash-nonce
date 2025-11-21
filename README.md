@@ -15,7 +15,6 @@ Create a new redis database on [upstash](https://console.upstash.com/)
 ```typescript
 import { NonceManager } from '@tozielinski/next-upstash-nonce'
 import { Redis } from "@upstash/redis";
-import NonceManager from "@tozielinski/next-upstash-nonce";
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL as string,
