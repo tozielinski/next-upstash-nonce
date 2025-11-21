@@ -1,6 +1,6 @@
 {
   "name": "@tozielinski/next-upstash-nonce",
-  "version": "0.3.2",
+  "version": "0.2.0",
   "description": "Create, store, verify and delete nonces in Redis by Upstash for Next.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
