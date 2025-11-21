@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.3](https://github.com/tozielinski/next-upstash-nonce/compare/v1.1.2...v1.1.3) (2025-11-21)
+
+
+### Bug Fixes
+
+* changed back to crypto ([b7db377](https://github.com/tozielinski/next-upstash-nonce/commit/b7db3770cf13f0473b9c566a2e8812276cea43fb))
+* try to implement auto-merge ([3155121](https://github.com/tozielinski/next-upstash-nonce/commit/31551211d8c2cfeb4b33ce6f45a3fb7959ac7934))
+
 ## [1.1.2](https://github.com/tozielinski/next-upstash-nonce/compare/v1.1.1...v1.1.2) (2025-11-21)
 
 
