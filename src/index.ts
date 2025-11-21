@@ -1,8 +1,8 @@
 'use server'
 
 import { Redis } from "@upstash/redis";
-// import {v4 as uuid} from "uuid";
-import crypto from "crypto";
+import {v4 as uuid} from "uuid";
+// import crypto from "crypto";
 
 export type NonceOptions = {
     length?: number; // bytes
@@ -31,9 +31,9 @@ export class NonceManager {
      * and returns the nonce string.
      */
     async create(): Promise<string> {
-        const buffer = crypto.randomBytes(this.length);
-        const nonce = buffer.toString("hex");
-        // const nonce = uuid();
+        // const buffer = crypto.randomBytes(this.length);
+        // const nonce = buffer.toString("hex");
+        const nonce = uuid();
         const key = this.prefix + nonce;
 
 // console.log("creating nonce:", nonce);
