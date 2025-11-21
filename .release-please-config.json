@@ -3,7 +3,7 @@
   "release-type": "node",
   "packages": {
     ".": {
-      "component": "@tozielinski/next-upstash-nonce"
+      "component": "next-upstash-nonce"
     }
   }
 }
