@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/tozielinski/next-upstash-nonce/compare/v1.2.0...v1.2.1) (2025-11-21)
+
+
+### Bug Fixes
+
+* error in npm publish ([d337519](https://github.com/tozielinski/next-upstash-nonce/commit/d3375198b2bcabd846c5f7d04cb44e2059a71462))
+
 ## [1.2.0](https://github.com/tozielinski/next-upstash-nonce/compare/v1.1.5...v1.2.0) (2025-11-21)
 
 
