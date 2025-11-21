@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/tozielinski/next-upstash-nonce/compare/v1.1.3...v1.1.4) (2025-11-21)
+
+
+### Bug Fixes
+
+* try to implement auto-merge ([49705cf](https://github.com/tozielinski/next-upstash-nonce/commit/49705cf1227cb2c8fc294600d0f7b308a6e865ca))
+
 ## [1.1.3](https://github.com/tozielinski/next-upstash-nonce/compare/v1.1.2...v1.1.3) (2025-11-21)
 
 
