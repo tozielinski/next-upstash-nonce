@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/%40tozielinski%2Fnext-upstash-nonce)](https://www.npmjs.com/package/@tozielinski/next-upstash-nonce)
 
-Create, store, verify and delete nonces in Redis by Upstash for Next.js
+## Create, store, verify and delete nonces in Redis by Upstash for Next.js
 
 # Quick Start
 ### Install the package:
