@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/tozielinski/next-upstash-nonce/compare/v1.1.5...v1.2.0) (2025-11-21)
+
+
+### Features
+
+* replaced crypto by uuid ([38e2076](https://github.com/tozielinski/next-upstash-nonce/commit/38e2076fe5139848e05c37d3961eec01d84cc346))
+
 ## [1.1.5](https://github.com/tozielinski/next-upstash-nonce/compare/v1.1.4...v1.1.5) (2025-11-21)
 
 
