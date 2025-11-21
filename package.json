@@ -32,7 +32,8 @@
   "homepage": "https://github.com/tozielinski/next-upstash-nonce#readme",
   "dependencies": {
     "@upstash/redis": "1.22.0",
-    "crypto": "^1.0.1"
+    "crypto": "^1.0.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
