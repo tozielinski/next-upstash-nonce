@@ -14,9 +14,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Release Please
-        uses: google-github-actions/release-please-action@v4
+      - name: Run Release Please
+        uses: googleapis/release-please-action@v4
         with:
-          release-type: node
-          package-name: "@tozielinski/next-upstash-nonce"
           token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+          path: "."                 # das root package
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
