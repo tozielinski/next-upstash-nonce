@@ -2,3 +2,5 @@ node_modules
 .github
 .idea
 .release*.json
+tsconfig.json
+src/*
