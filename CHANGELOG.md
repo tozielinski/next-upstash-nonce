@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/tozielinski/next-upstash-nonce/compare/v1.2.1...v1.2.2) (2025-11-21)
+
+
+### Bug Fixes
+
+* add .npmignore ([4aafa2c](https://github.com/tozielinski/next-upstash-nonce/commit/4aafa2c9f4081c44030babbeb35c8a5573ef6c3b))
+
 ## [1.2.1](https://github.com/tozielinski/next-upstash-nonce/compare/v1.2.0...v1.2.1) (2025-11-21)
 
 
