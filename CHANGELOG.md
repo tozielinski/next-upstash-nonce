@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/tozielinski/next-upstash-nonce/compare/v1.2.3...v1.3.0) (2025-11-22)
+
+
+### Features
+
+* create two new methods, to check nonces in the header of a request [verifyNonceFromRequest(), verifyAndDeleteNonceFromRequest()] ([a768479](https://github.com/tozielinski/next-upstash-nonce/commit/a76847993bb7fe66bf21900d83eb1ca5760d8afa))
+
 ## [1.2.3](https://github.com/tozielinski/next-upstash-nonce/compare/v1.2.2...v1.2.3) (2025-11-21)
 
 
