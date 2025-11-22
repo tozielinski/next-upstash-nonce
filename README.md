@@ -52,7 +52,26 @@ export async function POST(req: Request) {
 
     const valid = await nonceManager.verifyAndDelete(nonce);
 
+    // valid will be true if nonce was found and deleted
+    // false if nonce was not found or expired
+    
     return NextResponse.json({nonce: nonce, valid: valid});
+}
+```
+or more simple
+```typescript
+'use server'
+mport {NextResponse} from "next/server";
+import {nonceManager} from "@/[wherever you store your nonceManager instance]";
+
+export async function POST(req: Request) {
+    const result = await nonceManager.verifyAndDeleteNonceFromRequest(req);
+
+    // result will be {nonce: string, valid: true} or
+    // {valid false, reason: string, response: NextResponse}
+    // if nonce was not found or expired
+    
+    return NextResponse.json({nonce: result.nonce, valid: result.valid});
 }
 ```
 ### Use it in your client side
