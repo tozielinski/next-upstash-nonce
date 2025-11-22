@@ -2,12 +2,20 @@
 
 import { Redis } from "@upstash/redis";
 import {v4 as uuid} from "uuid";
-// import crypto from "crypto";
 
 export type NonceOptions = {
     length?: number; // bytes
     ttlSeconds?: number; // Time-to-live in Redis
     prefix?: string;
+};
+
+export type NonceCheckResult = | {
+    valid: true;
+    nonce: string
+} | {
+    valid: false;
+    reason: "missing-header" | "invalid-or-expired";
+    response: Response
 };
 
 export class NonceManager {
@@ -31,13 +39,9 @@ export class NonceManager {
      * and returns the nonce string.
      */
     async create(): Promise<string> {
-        // const buffer = crypto.randomBytes(this.length);
-        // const nonce = buffer.toString("hex");
         const nonce = uuid();
         const key = this.prefix + nonce;
 
-// console.log("creating nonce:", nonce);
-// set with ttl (nx not required — collisions extremely unlikely)
         await this.redis.set(key, "1", { ex: this.ttlSeconds });
         return nonce;
     }
@@ -47,18 +51,25 @@ export class NonceManager {
      * verifies a nonce and deletes it from Redis,
      * returning true if the nonce exists and has not expired.
      */
+    async verify(nonce: string): Promise<boolean> {
+        if (!nonce) return false;
+
+        try {
+            const res = await (this.redis as any).get(`nonce:${nonce}`);
+            return res !== null;
+        } catch (err) {
+            console.error("verify error:", err);
+            return false;
+        }
+    }
+
+
+    /**
+     * verifies a nonce and deletes it from Redis,
+     * returning true if the nonce exists and has not expired.
+     */
     async verifyAndDelete(nonce: string): Promise<boolean> {
         if (!nonce) return false;
-  //       const key = this.prefix + nonce;
-  //
-  //       const script = `
-  //   local v = redis.call('GET', KEYS[1])
-  //   if v then
-  //     redis.call('DEL', KEYS[1])
-  //     return v
-  //   end
-  //   return nil
-  // `;
 
         try {
             const res = await (this.redis as any).get(`nonce:${nonce}`);
@@ -69,6 +80,86 @@ export class NonceManager {
             console.error("verifyAndDelete error:", err);
             return false;
         }
+    }
+
+
+    /**
+     * verifies a nonce from the Header of a request
+     * returns a NonceCheckResult if the nonce exists and has not expired.
+     */
+    async verifyNonceFromRequest(req: Request): Promise<NonceCheckResult> {
+        const nonce = req.headers.get("x-api-nonce");
+
+        if (!nonce) {
+            const response = Response.json(
+                { error: "Missing x-api-nonce header" },
+                { status: 403 }
+            );
+            return {
+                valid: false,
+                reason: "missing-header",
+                response,
+            };
+        }
+
+        const valid = await this.verify(nonce);
+
+        if (!valid) {
+            const response = Response.json(
+                { error: "Invalid or expired nonce" },
+                { status: 403 }
+            );
+            return {
+                valid: false,
+                reason: "invalid-or-expired",
+                response,
+            };
+        }
+
+        return {
+            valid: true,
+            nonce,
+        };
+    }
+
+
+    /**
+     * verifies a nonce from the Header of a request and deletes it from Redis
+     * returns a NonceCheckResult if the nonce exists and has not expired.
+     */
+    async verifyAndDeleteNonceFromRequest(req: Request): Promise<NonceCheckResult> {
+        const nonce = req.headers.get("x-api-nonce");
+
+        if (!nonce) {
+            const response = Response.json(
+                { error: "Missing x-api-nonce header" },
+                { status: 403 }
+            );
+            return {
+                valid: false,
+                reason: "missing-header",
+                response,
+            };
+        }
+
+        const valid = await this.verifyAndDelete(nonce);
+
+        if (!valid) {
+            const response = Response.json(
+                { error: "Invalid or expired nonce" },
+                { status: 403 }
+            );
+            return {
+                valid: false,
+                reason: "invalid-or-expired",
+                response,
+            };
+        }
+
+        return {
+            valid: true,
+            nonce,
+        };
     }
 
 
