@@ -4,9 +4,11 @@ import { Redis } from "@upstash/redis";
 import {v4 as uuid} from "uuid";
 
 export type NonceOptions = {
-    length?: number; // bytes
-    ttlSeconds?: number; // Time-to-live in Redis
+    // length?: number; // bytes
+    ttlNonce?: number; // TTL for nonce in Redis
     prefix?: string;
+    ttlRateLimit?: number; // TTL for rate limiting counter in Redis
+    countRateLimit?: number;
 };
 
 export type NonceCheckResult = | {
@@ -14,22 +16,65 @@ export type NonceCheckResult = | {
     nonce: string
 } | {
     valid: false;
-    reason: "missing-header" | "invalid-or-expired";
+    reason: 'missing-header' | 'invalid-or-expired';
     response: Response
+};
+
+export type RateLimitResult = | {
+    valid: true;
+    ip: string;
+    requests: number;
+} | {
+    valid: false;
+    ip: string;
+    requests: number;
+    reason: `too-many-requests: ${number}`;
+    response: Response;
 };
 
 export class NonceManager {
     private redis: Redis;
-    private length: number;
-    private ttlSeconds: number;
+    private ttlNonce: number;
     private prefix: string;
+    private ttlRateLimit: number;
+    private countRateLimit: number;
 
 
     constructor(redis: Redis, opts: NonceOptions = {}) {
         this.redis = redis;
-        this.length = opts.length ?? 32; // default 32 bytes -> 64 hex chars
-        this.ttlSeconds = opts.ttlSeconds ?? 60 * 5; // default 5 minutes
+        this.ttlNonce = opts.ttlNonce ?? 60; // default 1 minute
         this.prefix = opts.prefix ?? "nonce:";
+        this.ttlRateLimit = opts.ttlRateLimit ?? 60; // default 1 minute
+        this.countRateLimit = opts.countRateLimit ?? 5; // default 5 times
+    }
+
+    /**
+     * makes option parameters available in the server in environment files
+     */
+    private getEnvValue(name: string, fallback: number): number {
+        const val = process.env[name];
+        const num = Number(val);
+
+        if (val === undefined || isNaN(num)) {
+            return fallback;
+        }
+        return num;
+    }
+
+
+    /**
+     * extracts client IP from request headers
+     */
+    private getClientIp(req: Request): string {
+        const forwardedFor = req.headers.get("x-forwarded-for");
+        if (forwardedFor) {
+            return forwardedFor.split(",")[0].trim();
+        }
+        const realIp = req.headers.get("x-real-ip");
+        if (realIp) {
+            return realIp;
+        }
+        return "unknown";
     }
 
 
@@ -41,8 +86,9 @@ export class NonceManager {
     async create(): Promise<string> {
         const nonce = uuid();
         const key = this.prefix + nonce;
+        const ttl = this.getEnvValue("NONCE_TTL_SECONDS", this.ttlNonce);
 
-        await this.redis.set(key, "1", { ex: this.ttlSeconds });
+        await this.redis.set(key, "1", { ex: ttl });
         return nonce;
     }
 
@@ -170,7 +216,27 @@ export class NonceManager {
         const key = this.prefix + nonce;
         await this.redis.del(key);
     }
-}
 
+
+    /**
+     * rate limits requests from the same IP address
+     */
+    async rateLimiter(req: Request): Promise<RateLimitResult> {
+        const ip = this.getClientIp(req);
+        const key = `rate:${ip}`;
+        const requests = (await this.redis.incr(key)) ?? 0;
+
+        if (requests === 1) {
+            await this.redis.expire(key, this.getEnvValue("RATE_LIMIT_TTL_SECONDS", this.ttlRateLimit)); // counter runs 60s
+        }
+
+        if (requests > this.getEnvValue("RATE_LIMIT_COUNT", this.countRateLimit)) {
+            const response = Response.json({ error: "Too many requests" }, { status: 429 });
+            return { valid: false, ip, requests, reason: `too-many-requests: ${requests}`, response: response };
+        }
+
+        return {valid: true, ip, requests};
+    }
+}
 
 export default NonceManager;

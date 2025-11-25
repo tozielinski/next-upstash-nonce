@@ -2,7 +2,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/%40tozielinski%2Fnext-upstash-nonce)](https://www.npmjs.com/package/@tozielinski/next-upstash-nonce)
 
-## Create, store, verify and delete nonces in Redis by Upstash for Next.js
+## Create, store, verify and delete nonces in Redis by Upstash for Next.js and/or secure your API endpoints with a rate limiter
 
 # Quick Start
 ### Install the package:
@@ -33,7 +33,7 @@ export async function createNonce(): Promise<string> {
     return await nonceManager.create();
 }
 ```
-### Secure your API endpoint
+### Secure your API endpoint with a Nonce
 ```typescript
 'use server'
 
@@ -41,7 +41,7 @@ import {NextResponse} from "next/server";
 import {nonceManager} from "@/[wherever you store your nonceManager instance]";
 
 export async function POST(req: Request) {
-    const nonce = req.headers.get("x-api-nonce");
+    const nonce: boolean = req.headers.get("x-api-nonce");
 
     if (!nonce) {
         return NextResponse.json(
@@ -61,15 +61,25 @@ export async function POST(req: Request) {
 or more simple
 ```typescript
 'use server'
-mport {NextResponse} from "next/server";
+import {NextResponse} from "next/server";
 import {nonceManager} from "@/[wherever you store your nonceManager instance]";
+import {NonceCheckResult} from "@tozielinski/next-upstash-nonce";
 
 export async function POST(req: Request) {
-    const result = await nonceManager.verifyAndDeleteNonceFromRequest(req);
+    const result: NonceCheckResult = await nonceManager.verifyAndDeleteNonceFromRequest(req);
 
     // result will be {nonce: string, valid: true} or
     // {valid false, reason: string, response: NextResponse}
-    // if nonce was not found or expired
+    // if nonce was not found or expired:
+    //
+    // export type NonceCheckResult = | {
+    //     valid: true;
+    //     nonce: string
+    // } | {
+    //     valid: false;
+    //     reason: 'missing-header' | 'invalid-or-expired';
+    //     response: Response
+    // };
     
     return NextResponse.json({nonce: result.nonce, valid: result.valid});
 }
@@ -83,7 +93,7 @@ import {createNonce} from "@/[wherever you store your server action]";
 
 export default function NonceSecuredComponent() {
     const [running, setRunning] = useState(false);
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState('');
 
     const handleClick = async () => {
         if (running) return;
@@ -123,4 +133,32 @@ export default function NonceSecuredComponent() {
     )
 }
 ```
+### Secure your API endpoint with a Rate Limiter
+```typescript
+'use server'
+import {NextResponse} from "next/server";
+import {nonceManager} from "@/[wherever you store your nonceManager instance]";
+import {RateLimitResult} from "@tozielinski/next-upstash-nonce";
 
+export async function POST(req: Request) {
+    const rateLimiter: RateLimitResult = await nonceManager.rateLimiter(req!);
+
+    // result will be {valid: true, ip: string, requests: number} or
+    // {valid false, ip:string, requests: number, reason: string, response: NextResponse}
+    // if rate limit was reached or broken:
+    //
+    // export type RateLimitResult = | {
+    //     valid: true;
+    //     ip: string;
+    //     requests: number;
+    // } | {
+    //     valid: false;
+    //     ip: string;
+    //     requests: number;
+    //     reason: `too-many-requests: ${number}`;
+    //     response: Response;
+    // };
+
+    return NextResponse.json({valid: result.valid, ip: result.ip, requests: result.requests});
+}
+```
