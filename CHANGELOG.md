@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/tozielinski/next-upstash-nonce/compare/v1.4.0...v1.4.1) (2025-12-17)
+
+
+### Bug Fixes
+
+* remove redis and uuid package as dependency and add as peerDependency ([65213a3](https://github.com/tozielinski/next-upstash-nonce/commit/65213a3871a484e9fbdd0def529fe4b899de3fb2))
+
 ## [1.4.0](https://github.com/tozielinski/next-upstash-nonce/compare/v1.3.1...v1.4.0) (2025-11-25)
 
 
