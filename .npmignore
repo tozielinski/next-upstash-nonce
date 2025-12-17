@@ -2,5 +2,7 @@ node_modules
 .github
 .idea
 .release*.json
+.env*
 tsconfig.json
 src/*
+*.tgz
