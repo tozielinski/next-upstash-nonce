@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/tozielinski/next-upstash-nonce/compare/v1.4.1...v1.4.2) (2025-12-27)
+
+
+### Bug Fixes
+
+* add rateLimiter for server action, minor bugfixes ([967269d](https://github.com/tozielinski/next-upstash-nonce/commit/967269d87c12119765e05d150aa9458d730dc53c))
+
 ## [1.4.1](https://github.com/tozielinski/next-upstash-nonce/compare/v1.4.0...v1.4.1) (2025-12-17)
 
 
