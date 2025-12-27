@@ -1,6 +1,6 @@
 'use server'
 
-import { Redis } from "@upstash/redis";
+import {Redis} from "@upstash/redis";
 import {v4 as uuid} from "uuid";
 
 export type NonceOptions = {
@@ -29,15 +29,15 @@ export type RateLimitResult = | {
     ip: string;
     requests: number;
     reason: `too-many-requests: ${number}`;
-    response: Response;
+    response?: Response;
 };
 
 export class NonceManager {
     private redis: Redis;
-    private ttlNonce: number;
-    private prefix: string;
-    private ttlRateLimit: number;
-    private countRateLimit: number;
+    private readonly ttlNonce: number;
+    private readonly prefix: string;
+    private readonly ttlRateLimit: number;
+    private readonly countRateLimit: number;
 
 
     constructor(redis: Redis, opts: NonceOptions = {}) {
@@ -77,6 +77,22 @@ export class NonceManager {
         return "unknown";
     }
 
+    /**
+     * extracts client IP from headers for server actions
+     */
+    async getClientIpFromHeaders(headers: Headers): Promise<string> {
+        const forwardedFor = headers.get("x-forwarded-for");
+        if (forwardedFor) {
+            return forwardedFor.split(",")[0].trim();
+        }
+
+        const realIp = headers.get("x-real-ip");
+        if (realIp) {
+            return realIp;
+        }
+
+        return "unknown";
+    }
 
     /**
      * generates a new, secure nonce,
@@ -88,7 +104,7 @@ export class NonceManager {
         const key = this.prefix + nonce;
         const ttl = this.getEnvValue("NONCE_TTL_SECONDS", this.ttlNonce);
 
-        await this.redis.set(key, "1", { ex: ttl });
+        await this.redis.set(key, "1", {ex: ttl});
         return nonce;
     }
 
@@ -130,7 +146,7 @@ export class NonceManager {
 
 
     /**
-     * verifies a nonce from the Header of a request
+     * verifies nonce from the Header of a request
      * returns a NonceCheckResult if the nonce exists and has not expired.
      */
     async verifyNonceFromRequest(req: Request): Promise<NonceCheckResult> {
@@ -138,8 +154,8 @@ export class NonceManager {
 
         if (!nonce) {
             const response = Response.json(
-                { error: "Missing x-api-nonce header" },
-                { status: 403 }
+                {error: "Missing x-api-nonce header"},
+                {status: 403}
             );
             return {
                 valid: false,
@@ -152,8 +168,8 @@ export class NonceManager {
 
         if (!valid) {
             const response = Response.json(
-                { error: "Invalid or expired nonce" },
-                { status: 403 }
+                {error: "Invalid or expired nonce"},
+                {status: 403}
             );
             return {
                 valid: false,
@@ -170,7 +186,7 @@ export class NonceManager {
 
 
     /**
-     * verifies a nonce from the Header of a request and deletes it from Redis
+     * verifies nonce from the Header of a request and deletes it from Redis
      * returns a NonceCheckResult if the nonce exists and has not expired.
      */
     async verifyAndDeleteNonceFromRequest(req: Request): Promise<NonceCheckResult> {
@@ -178,8 +194,8 @@ export class NonceManager {
 
         if (!nonce) {
             const response = Response.json(
-                { error: "Missing x-api-nonce header" },
-                { status: 403 }
+                {error: "Missing x-api-nonce header"},
+                {status: 403}
             );
             return {
                 valid: false,
@@ -192,8 +208,8 @@ export class NonceManager {
 
         if (!valid) {
             const response = Response.json(
-                { error: "Invalid or expired nonce" },
-                { status: 403 }
+                {error: "Invalid or expired nonce"},
+                {status: 403}
             );
             return {
                 valid: false,
@@ -210,7 +226,7 @@ export class NonceManager {
 
 
     /**
-     * Optional: delete a nonce from Redis manually
+     * Optional: delete nonce from Redis manually
      */
     async delete(nonce: string): Promise<void> {
         const key = this.prefix + nonce;
@@ -227,12 +243,44 @@ export class NonceManager {
         const requests = (await this.redis.incr(key)) ?? 0;
 
         if (requests === 1) {
-            await this.redis.expire(key, this.getEnvValue("RATE_LIMIT_TTL_SECONDS", this.ttlRateLimit)); // counter runs 60s
+            await this.redis.expire(
+                key,
+                this.getEnvValue("RATE_LIMIT_TTL_SECONDS", this.ttlRateLimit)
+            ); // counter runs 60s
         }
 
         if (requests > this.getEnvValue("RATE_LIMIT_COUNT", this.countRateLimit)) {
-            const response = Response.json({ error: "Too many requests" }, { status: 429 });
-            return { valid: false, ip, requests, reason: `too-many-requests: ${requests}`, response: response };
+            const response = Response.json({error: "Too many requests"}, {status: 429});
+            return {
+                valid: false,
+                ip,
+                requests,
+                reason: `too-many-requests: ${requests}`,
+                response: response
+            };
+        }
+
+        return {valid: true, ip, requests};
+    }
+
+    async rateLimiterByIp(ip: string): Promise<RateLimitResult> {
+        const key = `rate:${ip}`;
+        const requests = (await this.redis.incr(key)) ?? 0;
+
+        if (requests === 1) {
+            await this.redis.expire(
+                key,
+                this.getEnvValue("RATE_LIMIT_TTL_SECONDS", this.ttlRateLimit)
+            );
+        }
+
+        if (requests > this.getEnvValue("RATE_LIMIT_COUNT", this.countRateLimit)) {
+            return {
+                valid: false,
+                ip,
+                requests,
+                reason: `too-many-requests: ${requests}`,
+            };
         }
 
         return {valid: true, ip, requests};
